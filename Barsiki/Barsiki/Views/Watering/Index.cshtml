@@ -1,0 +1,126 @@
+﻿@model Barsiki.Controllers.WateringViewModel
+
+@{
+    ViewData["Title"] = "Умная система полива";
+}
+
+<h1>Умная система полива растений</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Текущее состояние</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Режим:</strong>
+                    <span class="badge @GetModeBadgeClass(Model.EventType)">
+                        @GetModeName(Model.EventType)
+                    </span>
+                </div>
+                <div class="mb-3">
+                    <strong>Влажность почвы:</strong> @Model.CurrentMoisture%
+                    <div class="progress mt-2">
+                        <div class="progress-bar @GetMoistureColor(Model.CurrentMoisture)" 
+                             style="width: @Model.CurrentMoisture%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Порог полива:</strong> 
+                    Авто @(Model.IsWatering ? "выкл." : "вкл.") при @(Model.IsWatering ? "<70%" : "<30%")
+                </div>
+                <div class="mb-3">
+                    <strong>Состояние полива:</strong> 
+                    <span class="badge @(Model.IsWatering ? "bg-success" : "bg-secondary")">
+                        @(Model.IsWatering ? "Включен" : "Выключен")
+                    </span>
+                </div>
+                <form asp-action="ToggleWatering" method="post">
+                    <button type="submit" name="enable" value="true" class="btn btn-primary">
+                        Включить полив
+                    </button>
+                    <button type="submit" name="enable" value="false" class="btn btn-danger ms-2">
+                        Выключить полив
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>История поливов</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Время</th>
+                            <th>Тип события</th>
+                            <th>Влажность</th>
+                            <th>Состояние</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var record in Model.History)
+                        {
+                            <tr>
+                                <td>@record.Time.ToString("g")</td>
+                                <td>@GetEventTypeName(record.EventType)</td>
+                                <td>@record.MoistureLevel%</td>
+                                <td>
+                                    <span class="badge @(record.WateringEnabled ? "bg-success" : "bg-secondary")">
+                                        @(record.WateringEnabled ? "Вкл" : "Выкл")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetMoistureColor(int moisture)
+    {
+        if (moisture < 30) return "bg-danger";
+        if (moisture < 60) return "bg-warning";
+        return "bg-success";
+    }
+
+    string GetEventTypeName(string eventType)
+    {
+        return eventType switch
+        {
+            "manual" => "Ручное управление",
+            "automatic" => "Автоматический",
+            _ => "Датчик"
+        };
+    }
+
+    string GetModeBadgeClass(string eventType)
+    {
+        return eventType switch
+        {
+            "automatic" => "bg-info",
+            "manual" => "bg-warning",
+            _ => "bg-secondary"
+        };
+    }
+
+    string GetModeName(string eventType)
+    {
+        return eventType switch
+        {
+            "automatic" => "Автоматический режим",
+            "manual" => "Ручное управление",
+            _ => "Мониторинг"
+        };
+    }
+}
