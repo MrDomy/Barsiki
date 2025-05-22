@@ -17,19 +17,21 @@ namespace Barsiki.Controllers
             _context = context;
         }
         [HttpGet]
-        public async Task<IActionResult> GetCurrentStatus()
+        public async Task<IActionResult> CurrentState()
         {
-            var latest = await _context.WateringRecords
+            var lastRecord = await _context.WateringRecords
                 .OrderByDescending(r => r.Time)
                 .FirstOrDefaultAsync();
 
-            if (latest == null) return NotFound();
+            if (lastRecord == null)
+                return Json(new { Moisture = 0, Watering = false });
 
             return Json(new
             {
-                currentMoisture = latest.MoistureLevel,
-                isWatering = latest.WateringEnabled,
-                eventType = latest.EventType
+                Moisture = lastRecord.MoistureLevel,
+                Watering = lastRecord.WateringEnabled,
+                Time = lastRecord.Time.ToString("HH:mm:ss"),
+                Source = lastRecord.EventType
             });
         }
 
@@ -53,6 +55,27 @@ namespace Barsiki.Controllers
 
             return View(model);
         }
+        [HttpPost]
+        public async Task<IActionResult> SetMode(string mode) // "manual" или "automatic"
+        {
+            var lastRecord = await _context.WateringRecords
+                .OrderByDescending(r => r.Time)
+                .FirstOrDefaultAsync();
+
+            var record = new WateringRecord
+            {
+                Time = DateTime.Now,
+                EventType = mode,
+                MoistureLevel = lastRecord?.MoistureLevel ?? 0,
+                WateringEnabled = lastRecord?.WateringEnabled ?? false
+            };
+
+            _context.WateringRecords.Add(record);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> ToggleWatering(bool enable)
@@ -74,7 +97,23 @@ namespace Barsiki.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
+
+        // В WateringController.cs
+        public async Task<IActionResult> GetHistoryPartial()
+        {
+            var records = await _context.WateringRecords
+                .OrderByDescending(r => r.Time)
+                .Take(20)
+                .ToListAsync();
+
+            return PartialView("_WateringHistoryPartial", records);
+        }
+
     }
+
+
 
     public class WateringViewModel
     {

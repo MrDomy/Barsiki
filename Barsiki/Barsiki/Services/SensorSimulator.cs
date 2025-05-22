@@ -1,11 +1,5 @@
 ﻿using Barsiki.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Barsiki.Services
 {
@@ -13,12 +7,12 @@ namespace Barsiki.Services
     {
         private readonly IServiceProvider _services;
         private Timer _timer;
-        private int _currentMoisture = 50;
+        private int _currentMoisture = 20;
         private bool _isWatering = false;
+        private string _currentMode = "automatic"; // "manual" или "automatic"
         private DateTime _lastDbUpdate = DateTime.MinValue;
         private const int DryThreshold = 30;
         private const int WetThreshold = 70;
-        private const int ManualOverrideDuration = 30; // секунд
 
         public SensorSimulator(IServiceProvider services)
         {
@@ -38,59 +32,50 @@ namespace Barsiki.Services
 
             try
             {
-                // Проверка на ручное управление
-                var lastManual = await dbContext.WateringRecords
-                    .Where(r => r.EventType == "manual")
+                // Получаем текущий режим из последней записи
+                var lastRecord = await dbContext.WateringRecords
                     .OrderByDescending(r => r.Time)
                     .FirstOrDefaultAsync();
 
-                bool isManualMode = lastManual != null &&
-                                    (DateTime.Now - lastManual.Time).TotalSeconds < ManualOverrideDuration;
-
-                // Автоматическое управление поливом
-                if (!isManualMode)
+                if (lastRecord != null)
                 {
-                    if (_currentMoisture < DryThreshold && !_isWatering)
-                        _isWatering = true;
-                    else if (_currentMoisture > WetThreshold && _isWatering)
-                        _isWatering = false;
+                    _currentMode = lastRecord.EventType == "manual" ? "manual" : "automatic";
+                    _isWatering = lastRecord.WateringEnabled;
+                }
+
+                // В автоматическом режиме включаем/выключаем по влажности
+                if (_currentMode == "automatic")
+                {
+                    if (_currentMoisture < DryThreshold) _isWatering = true;
+                    else if (_currentMoisture > WetThreshold) _isWatering = false;
                 }
 
                 // Обновляем влажность
                 _currentMoisture += _isWatering ? 1 : -1;
                 _currentMoisture = Math.Clamp(_currentMoisture, 0, 100);
 
-                // Определение типа события
-                string eventType = isManualMode ? "manual" :
-                    (_isWatering && _currentMoisture < DryThreshold) ? "automatic" : "sensor_read";
-
-                // Последняя запись
-                var lastRecord = await dbContext.WateringRecords
-                    .OrderByDescending(r => r.Time)
-                    .FirstOrDefaultAsync();
-
-                bool shouldWriteToDb = lastRecord == null ||
-                    (DateTime.Now - _lastDbUpdate).TotalSeconds >= 10 ||
+                // Сохраняем в базу, если прошло >10 секунд или изменилось состояние полива
+                bool shouldWrite = lastRecord == null ||
+                    (DateTime.Now - _lastDbUpdate).TotalSeconds > 1 ||
                     _isWatering != lastRecord.WateringEnabled;
 
-                if (shouldWriteToDb)
+                if (shouldWrite)
                 {
-                    var record = new WateringRecord
+                    dbContext.WateringRecords.Add(new WateringRecord
                     {
                         Time = DateTime.Now,
-                        EventType = eventType,
+                        EventType = _currentMode,
                         MoistureLevel = _currentMoisture,
                         WateringEnabled = _isWatering
-                    };
+                    });
 
-                    dbContext.WateringRecords.Add(record);
                     await dbContext.SaveChangesAsync();
                     _lastDbUpdate = DateTime.Now;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка обработки данных: {ex.Message}");
+                Console.WriteLine($"Ошибка: {ex.Message}");
             }
         }
 

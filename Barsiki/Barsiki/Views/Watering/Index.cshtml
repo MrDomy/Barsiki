@@ -15,8 +15,8 @@
             <div class="card-body">
                 <div class="mb-3">
                     <strong>Режим:</strong>
-                    <span class="badge @GetModeBadgeClass(Model.EventType)">
-                        @GetModeName(Model.EventType)
+                    <span id="mode-badge" class="badge @GetModeBadgeClass(Model.EventType)">
+                        <span id="mode-text">@GetModeName(Model.EventType)</span>
                     </span>
                 </div>
                 <div class="mb-3">
@@ -34,7 +34,7 @@
                     <strong>Состояние полива:</strong> 
                     <span id="watering-state" class="badge @(Model.IsWatering ? "bg-success" : "bg-secondary")">
                         @(Model.IsWatering ? "Включен" : "Выключен")
-                </span>
+                    </span>
                 </div>
                 <form asp-action="ToggleWatering" method="post">
                     <button type="submit" name="enable" value="true" class="btn btn-primary">
@@ -44,6 +44,11 @@
                         Выключить полив
                     </button>
                 </form>
+
+                <div class="mt-3">
+                    <button class="btn btn-outline-warning" onclick="setMode('manual')">Ручной режим</button>
+                    <button class="btn btn-outline-info mt-1" onclick="setMode('automatic')">Автоматический режим</button>
+                </div>
             </div>
         </div>
     </div>
@@ -68,16 +73,16 @@
                     <tbody>
                         @foreach (var record in Model.History)
                         {
-                            <tr>
-                                <td>@record.Time.ToString("g")</td>
-                                <td>@GetEventTypeName(record.EventType)</td>
-                                <td>@record.MoistureLevel%</td>
-                                <td>
-                                    <span class="badge @(record.WateringEnabled ? "bg-success" : "bg-secondary")">
+                                <tr>
+                                    <td>@record.Time.ToString("g")</td>
+                                    <td>@GetEventTypeName(record.EventType)</td>
+                                    <td>@record.MoistureLevel%</td>
+                                    <td>
+                                        <span class="badge @(record.WateringEnabled ? "bg-success" : "bg-secondary")">
                                         @(record.WateringEnabled ? "Вкл" : "Выкл")
-                                    </span>
-                                </td>
-                            </tr>
+                                        </span>
+                                    </td>
+                                </tr>
                         }
                     </tbody>
                 </table>
@@ -124,29 +129,58 @@
         };
     }
 }
+
 @section Scripts {
         <script>
-            setInterval(() => {
+            function setMode(mode) {
+                fetch(`/Watering/SetMode?mode=${mode}`, { method: 'POST' })
+                    .then(() => {
+                        refreshStatus();
+                    });
+            }
+
+            function refreshStatus() {
                 fetch('/Watering/GetCurrentStatus')
                     .then(response => response.json())
                     .then(data => {
-                        // Обновляем текст и прогресс-бар влажности
-                        document.getElementById('moisture-value').textContent = data.currentMoisture + '%';
+                        // Влажность
+                        document.getElementById('moisture-value').textContent = data.moisture + '%';
 
                         const bar = document.querySelector('.progress-bar');
-                        bar.style.width = data.currentMoisture + '%';
-                        bar.className = 'progress-bar'; // сброс классов
-
-                        if (data.currentMoisture < 30) bar.classList.add('bg-danger');
-                        else if (data.currentMoisture < 60) bar.classList.add('bg-warning');
+                        bar.style.width = data.moisture + '%';
+                        bar.className = 'progress-bar';
+                        if (data.moisture < 30) bar.classList.add('bg-danger');
+                        else if (data.moisture < 60) bar.classList.add('bg-warning');
                         else bar.classList.add('bg-success');
 
-                        // Обновляем состояние полива
+                        // Состояние полива
                         const badge = document.getElementById('watering-state');
-                        badge.textContent = data.isWatering ? 'Включен' : 'Выключен';
-                        badge.className = 'badge ' + (data.isWatering ? 'bg-success' : 'bg-secondary');
+                        badge.textContent = data.watering ? 'Включен' : 'Выключен';
+                        badge.className = 'badge ' + (data.watering ? 'bg-success' : 'bg-secondary');
+
+                        // Режим
+                        const modeBadge = document.getElementById('mode-badge');
+                        const modeText = document.getElementById('mode-text');
+
+                        let modeName = '';
+                        let modeClass = '';
+
+                        if (data.source === 'manual') {
+                            modeName = 'Ручное управление';
+                            modeClass = 'bg-warning';
+                        } else if (data.source === 'automatic') {
+                            modeName = 'Автоматический режим';
+                            modeClass = 'bg-info';
+                        } else {
+                            modeName = 'Мониторинг';
+                            modeClass = 'bg-secondary';
+                        }
+
+                        modeText.textContent = modeName;
+                        modeBadge.className = 'badge ' + modeClass;
                     });
-            }, 2000);
+            }
+
+            setInterval(refreshStatus, 2000);
         </script>
 }
-

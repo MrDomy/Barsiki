@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Barsiki")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+777e9f817f1d62d298a41680bcd89c3421f6da14")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c4dcb597671fe86ed26626e8364cdbd0f6c4ac65")]
 [assembly: System.Reflection.AssemblyProductAttribute("Barsiki")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Barsiki")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
