@@ -16,6 +16,22 @@ namespace Barsiki.Controllers
         {
             _context = context;
         }
+        [HttpGet]
+        public async Task<IActionResult> GetCurrentStatus()
+        {
+            var latest = await _context.WateringRecords
+                .OrderByDescending(r => r.Time)
+                .FirstOrDefaultAsync();
+
+            if (latest == null) return NotFound();
+
+            return Json(new
+            {
+                currentMoisture = latest.MoistureLevel,
+                isWatering = latest.WateringEnabled,
+                eventType = latest.EventType
+            });
+        }
 
         public async Task<IActionResult> Index()
         {

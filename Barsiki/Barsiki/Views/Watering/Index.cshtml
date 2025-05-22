@@ -20,7 +20,7 @@
                     </span>
                 </div>
                 <div class="mb-3">
-                    <strong>Влажность почвы:</strong> @Model.CurrentMoisture%
+                    <strong>Влажность почвы:</strong> <span id="moisture-value">@Model.CurrentMoisture%</span>
                     <div class="progress mt-2">
                         <div class="progress-bar @GetMoistureColor(Model.CurrentMoisture)" 
                              style="width: @Model.CurrentMoisture%"></div>
@@ -32,9 +32,9 @@
                 </div>
                 <div class="mb-3">
                     <strong>Состояние полива:</strong> 
-                    <span class="badge @(Model.IsWatering ? "bg-success" : "bg-secondary")">
+                    <span id="watering-state" class="badge @(Model.IsWatering ? "bg-success" : "bg-secondary")">
                         @(Model.IsWatering ? "Включен" : "Выключен")
-                    </span>
+                </span>
                 </div>
                 <form asp-action="ToggleWatering" method="post">
                     <button type="submit" name="enable" value="true" class="btn btn-primary">
@@ -124,3 +124,29 @@
         };
     }
 }
+@section Scripts {
+        <script>
+            setInterval(() => {
+                fetch('/Watering/GetCurrentStatus')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Обновляем текст и прогресс-бар влажности
+                        document.getElementById('moisture-value').textContent = data.currentMoisture + '%';
+
+                        const bar = document.querySelector('.progress-bar');
+                        bar.style.width = data.currentMoisture + '%';
+                        bar.className = 'progress-bar'; // сброс классов
+
+                        if (data.currentMoisture < 30) bar.classList.add('bg-danger');
+                        else if (data.currentMoisture < 60) bar.classList.add('bg-warning');
+                        else bar.classList.add('bg-success');
+
+                        // Обновляем состояние полива
+                        const badge = document.getElementById('watering-state');
+                        badge.textContent = data.isWatering ? 'Включен' : 'Выключен';
+                        badge.className = 'badge ' + (data.isWatering ? 'bg-success' : 'bg-secondary');
+                    });
+            }, 2000);
+        </script>
+}
+

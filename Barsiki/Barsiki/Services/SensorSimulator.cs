@@ -15,10 +15,10 @@ namespace Barsiki.Services
         private Timer _timer;
         private int _currentMoisture = 50;
         private bool _isWatering = false;
-        private DateTime _lastManualTime = DateTime.MinValue;
+        private DateTime _lastDbUpdate = DateTime.MinValue;
         private const int DryThreshold = 30;
         private const int WetThreshold = 70;
-        private const int ManualOverrideDuration = 30; // секунды
+        private const int ManualOverrideDuration = 30; // секунд
 
         public SensorSimulator(IServiceProvider services)
         {
@@ -27,71 +27,70 @@ namespace Barsiki.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _timer = new Timer(SimulateSensor, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            _timer = new Timer(async _ => await ProcessSensorData(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
             return Task.CompletedTask;
         }
 
-        private async void SimulateSensor(object state)
+        private async Task ProcessSensorData()
         {
             using var scope = _services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            // Проверяем последнее ручное управление
-            var lastManual = await dbContext.WateringRecords
-                .Where(r => r.EventType == "manual")
-                .OrderByDescending(r => r.Time)
-                .FirstOrDefaultAsync();
-
-            bool manualOverride = lastManual != null &&
-                               (DateTime.Now - lastManual.Time).TotalSeconds < ManualOverrideDuration;
-
-            // Автоматическое управление (если нет ручного переопределения)
-            if (!manualOverride)
+            try
             {
-                if (_currentMoisture < DryThreshold && !_isWatering)
+                // Проверка на ручное управление
+                var lastManual = await dbContext.WateringRecords
+                    .Where(r => r.EventType == "manual")
+                    .OrderByDescending(r => r.Time)
+                    .FirstOrDefaultAsync();
+
+                bool isManualMode = lastManual != null &&
+                                    (DateTime.Now - lastManual.Time).TotalSeconds < ManualOverrideDuration;
+
+                // Автоматическое управление поливом
+                if (!isManualMode)
                 {
-                    _isWatering = true;
+                    if (_currentMoisture < DryThreshold && !_isWatering)
+                        _isWatering = true;
+                    else if (_currentMoisture > WetThreshold && _isWatering)
+                        _isWatering = false;
                 }
-                else if (_currentMoisture > WetThreshold && _isWatering)
+
+                // Обновляем влажность
+                _currentMoisture += _isWatering ? 1 : -1;
+                _currentMoisture = Math.Clamp(_currentMoisture, 0, 100);
+
+                // Определение типа события
+                string eventType = isManualMode ? "manual" :
+                    (_isWatering && _currentMoisture < DryThreshold) ? "automatic" : "sensor_read";
+
+                // Последняя запись
+                var lastRecord = await dbContext.WateringRecords
+                    .OrderByDescending(r => r.Time)
+                    .FirstOrDefaultAsync();
+
+                bool shouldWriteToDb = lastRecord == null ||
+                    (DateTime.Now - _lastDbUpdate).TotalSeconds >= 10 ||
+                    _isWatering != lastRecord.WateringEnabled;
+
+                if (shouldWriteToDb)
                 {
-                    _isWatering = false;
+                    var record = new WateringRecord
+                    {
+                        Time = DateTime.Now,
+                        EventType = eventType,
+                        MoistureLevel = _currentMoisture,
+                        WateringEnabled = _isWatering
+                    };
+
+                    dbContext.WateringRecords.Add(record);
+                    await dbContext.SaveChangesAsync();
+                    _lastDbUpdate = DateTime.Now;
                 }
             }
-
-            // Изменение влажности
-            if (_isWatering)
+            catch (Exception ex)
             {
-                _currentMoisture = Math.Min(_currentMoisture + 2, 100);
-            }
-            else
-            {
-                _currentMoisture = Math.Max(_currentMoisture - 1, 0);
-            }
-
-            // Определяем тип события
-            string eventType = manualOverride ? "manual" :
-                             _isWatering && _currentMoisture < DryThreshold ? "automatic" :
-                             "sensor_read";
-
-            // Записываем в БД каждые 10 секунд или при изменении состояния
-            var lastRecord = await dbContext.WateringRecords
-                .OrderByDescending(r => r.Time)
-                .FirstOrDefaultAsync();
-
-            if (lastRecord == null ||
-                (DateTime.Now - lastRecord.Time).TotalSeconds >= 10 ||
-                _isWatering != lastRecord.WateringEnabled)
-            {
-                var record = new WateringRecord
-                {
-                    Time = DateTime.Now,
-                    EventType = eventType,
-                    MoistureLevel = _currentMoisture,
-                    WateringEnabled = _isWatering
-                };
-
-                dbContext.WateringRecords.Add(record);
-                await dbContext.SaveChangesAsync();
+                Console.WriteLine($"Ошибка обработки данных: {ex.Message}");
             }
         }
 

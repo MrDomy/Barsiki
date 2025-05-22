@@ -170,3 +170,4 @@ C:\Users\Domy\source\repos\Barsiki\Barsiki\bin\Debug\net8.0\runtimes\win\lib\net
 C:\Users\Domy\source\repos\Barsiki\Barsiki\obj\Debug\net8.0\Barsiki.csproj.AssemblyReference.cache
 C:\Users\Domy\source\repos\Barsiki\Barsiki\obj\Debug\net8.0\Barsiki.csproj.Up2Date
 C:\Users\Domy\source\repos\Barsiki\Barsiki\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\Domy\source\repos\Barsiki\Barsiki\obj\Debug\net8.0\Barsiki.sourcelink.json
