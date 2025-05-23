@@ -36,19 +36,20 @@
                         @(Model.IsWatering ? "Включен" : "Выключен")
                     </span>
                 </div>
-                <form asp-action="ToggleWatering" method="post">
-                    <button type="submit" name="enable" value="true" class="btn btn-primary">
+               <form asp-action="ToggleWatering" method="post" class="mb-3">
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" name="enable" value="true" class="btn btn-outline-success">
                         Включить полив
                     </button>
-                    <button type="submit" name="enable" value="false" class="btn btn-danger ms-2">
+                    <button type="submit" name="enable" value="false" class="btn btn-outline-success">
                         Выключить полив
                     </button>
-                </form>
-
-                <div class="mt-3">
-                    <button class="btn btn-outline-warning" onclick="setMode('manual')">Ручной режим</button>
-                    <button class="btn btn-outline-info mt-1" onclick="setMode('automatic')">Автоматический режим</button>
                 </div>
+            </form>
+
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-success" onclick="setMode('manual')">Ручной режим</button>
+                <button class="btn btn-outline-success" onclick="setMode('automatic')">Автоматический режим</button>
             </div>
         </div>
     </div>
@@ -111,13 +112,9 @@
 
     string GetModeBadgeClass(string eventType)
     {
-        return eventType switch
-        {
-            "automatic" => "bg-info",
-            "manual" => "bg-warning",
-            _ => "bg-secondary"
-        };
+        return "border border-success text-success bg-white";
     }
+
 
     string GetModeName(string eventType)
     {
@@ -163,21 +160,18 @@
                         const modeText = document.getElementById('mode-text');
 
                         let modeName = '';
-                        let modeClass = '';
+                        let badgeClass = 'badge border border-success text-success bg-white';
 
                         if (data.source === 'manual') {
                             modeName = 'Ручное управление';
-                            modeClass = 'bg-warning';
                         } else if (data.source === 'automatic') {
                             modeName = 'Автоматический режим';
-                            modeClass = 'bg-info';
                         } else {
                             modeName = 'Мониторинг';
-                            modeClass = 'bg-secondary';
                         }
 
+                        modeBadge.className = badgeClass;
                         modeText.textContent = modeName;
-                        modeBadge.className = 'badge ' + modeClass;
                     });
             }
 

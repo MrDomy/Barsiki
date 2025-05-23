@@ -1,0 +1,111 @@
+﻿@model Barsiki.Controllers.LightSensorViewModel
+
+@{
+    ViewData["Title"] = "Датчик освещенности";
+}
+
+<h1>Датчик освещенности</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Текущие показания</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Освещенность:</strong>
+                    <span id="light-value">@Model.CurrentLight</span> люкс
+                    <div class="progress mt-2">
+                        <div id="light-bar" class="progress-bar @GetStatusClass(Model.CurrentStatus)" 
+                             style="width: @(Model.CurrentLight / 10)%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Состояние:</strong>
+                    <span id="status-badge" class="badge @GetStatusClass(Model.CurrentStatus)">
+                        @Model.CurrentStatus
+                    </span>
+                </div>
+                <!-- Кнопка обновить удалена -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>История показаний</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Время</th>
+                            <th>Освещенность (люкс)</th>
+                            <th>Состояние</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var record in Model.History)
+                        {
+                                <tr>
+                                    <td>@record.Timestamp.ToString("g")</td>
+                                    <td>@record.LightLevel</td>
+                                    <td>
+                                        <span class="badge @GetStatusClass(record.Status)">
+                                        @record.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            function refreshLightData() {
+                fetch('/LightSensor/GetCurrentLight')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('light-value').textContent = data.lightLevel;
+
+                        const lightBar = document.getElementById('light-bar');
+                        lightBar.style.width = (data.lightLevel / 10) + '%';
+
+                        const statusBadge = document.getElementById('status-badge');
+                        statusBadge.textContent = data.status;
+                        statusBadge.className = 'badge ' + getStatusClass(data.status);
+                        lightBar.className = 'progress-bar ' + getStatusClass(data.status);
+                    });
+            }
+
+            function getStatusClass(status) {
+                switch(status.toLowerCase()) {
+                    case 'high': return 'bg-warning';
+                    case 'low': return 'bg-secondary';
+                    default: return 'bg-success';
+                }
+            }
+
+            setInterval(refreshLightData, 5000);
+        </script>
+}
+
+@functions {
+    string GetStatusClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "high" => "bg-warning",
+            "low" => "bg-secondary",
+            _ => "bg-success"
+        };
+    }
+}

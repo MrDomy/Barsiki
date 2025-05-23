@@ -20,3 +20,25 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Стили для датчика света */
+#light-bar {
+    transition: width 0.5s ease;
+}
+
+.light-indicator {
+    height: 20px;
+    border-radius: 4px;
+}
+
+.light-low {
+    background-color: #6c757d;
+}
+
+.light-normal {
+    background-color: #28a745;
+}
+
+.light-high {
+    background-color: #ffc107;
+}

@@ -1,0 +1,20 @@
+﻿@model List<Barsiki.Models.WateringRecord>
+
+@foreach (var record in Model)
+{
+        <tr>
+            <td>@record.Time.ToString("g")</td>
+            <td>@(record.EventType switch
+            {
+                "manual" => "Ручное управление",
+                "automatic" => "Автоматический",
+                _ => "Датчик"
+            })</td>
+            <td>@record.MoistureLevel%</td>
+            <td>
+                <span class="badge @(record.WateringEnabled ? "bg-success" : "bg-secondary")">
+                @(record.WateringEnabled ? "Вкл" : "Выкл")
+                </span>
+            </td>
+        </tr>
+}

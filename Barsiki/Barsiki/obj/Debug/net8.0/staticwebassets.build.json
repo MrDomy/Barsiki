@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "URuQ7qikEe/lrpxngOswrLdPfsHtWjyYNnLBV+wBu0w=",
+  "Hash": "+DgqWbLWGtepU5EOHC2ijQayz0QmnHC5V/Oza7K+bCg=",
   "Source": "Barsiki",
   "BasePath": "_content/Barsiki",
   "Mode": "Default",
@@ -73,8 +73,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "c2tiyv64ts",
-      "Integrity": "pAGv4ietcJNk/EwsQZ5BN9+K4MuNYS2a9wl4Jw+q9D0=",
+      "Fingerprint": "jiesypks60",
+      "Integrity": "e96XOX3lp84IqagE6A1eOg0v7ZgaWduKC9pO5lmChlQ=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\site.css"
@@ -1485,51 +1485,6 @@
       ]
     },
     {
-      "Route": "css/site.c2tiyv64ts.css",
-      "AssetFile": "C:\\Users\\Domy\\source\\repos\\Barsiki\\Barsiki\\wwwroot\\css\\site.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "362"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"pAGv4ietcJNk/EwsQZ5BN9+K4MuNYS2a9wl4Jw+q9D0=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Thu, 22 May 2025 07:02:07 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "c2tiyv64ts"
-        },
-        {
-          "Name": "label",
-          "Value": "css/site.css"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-pAGv4ietcJNk/EwsQZ5BN9+K4MuNYS2a9wl4Jw+q9D0="
-        }
-      ]
-    },
-    {
       "Route": "css/site.css",
       "AssetFile": "C:\\Users\\Domy\\source\\repos\\Barsiki\\Barsiki\\wwwroot\\css\\site.css",
       "Selectors": [],
@@ -1540,7 +1495,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "362"
+          "Value": "672"
         },
         {
           "Name": "Content-Type",
@@ -1548,11 +1503,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"pAGv4ietcJNk/EwsQZ5BN9+K4MuNYS2a9wl4Jw+q9D0=\""
+          "Value": "\"e96XOX3lp84IqagE6A1eOg0v7ZgaWduKC9pO5lmChlQ=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Thu, 22 May 2025 07:02:07 GMT"
+          "Value": "Thu, 22 May 2025 20:57:48 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1562,7 +1517,52 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-pAGv4ietcJNk/EwsQZ5BN9+K4MuNYS2a9wl4Jw+q9D0="
+          "Value": "sha256-e96XOX3lp84IqagE6A1eOg0v7ZgaWduKC9pO5lmChlQ="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.jiesypks60.css",
+      "AssetFile": "C:\\Users\\Domy\\source\\repos\\Barsiki\\Barsiki\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "672"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"e96XOX3lp84IqagE6A1eOg0v7ZgaWduKC9pO5lmChlQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 22 May 2025 20:57:48 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "jiesypks60"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-e96XOX3lp84IqagE6A1eOg0v7ZgaWduKC9pO5lmChlQ="
         }
       ]
     },

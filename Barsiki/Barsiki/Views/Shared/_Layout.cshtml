@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var isHomePage = Context.Request.Path == "/";
+}
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
@@ -11,7 +14,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Барсики</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Главное меню</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -19,6 +22,9 @@
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Watering" asp-action="Index">Система полива</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="LightSensor" asp-action="Index">Датчик света</a>
                         </li>
                     </ul>
                 </div>

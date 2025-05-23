@@ -1,8 +1,32 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Умная теплица";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mt-5">
+    <h1 class="display-4 fw-bold text-success">Добро пожаловать в систему умной теплицы 🌱</h1>
+    <p class="lead mt-3">
+        Наша система управляет поливом и освещением растений автоматически, 
+        используя современные датчики и алгоритмы.
+    </p>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-success mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-success">💧 Управление поливом</h5>
+                    <p class="card-text">Слежение за влажностью почвы и автоматическое включение полива при необходимости.</p>
+                    <a asp-controller="Watering" asp-action="Index" class="btn btn-outline-success">К поливу</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-warning mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">🔆 Контроль освещенности</h5>
+                    <p class="card-text">Регистрация уровня света и реагирование на перепады освещенности в теплице.</p>
+                    <a asp-controller="LightSensor" asp-action="Index" class="btn btn-outline-warning">К датчику света</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
